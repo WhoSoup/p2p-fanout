@@ -1,0 +1,19 @@
+{
+  "name": "p2p-fanout",
+  "version": "1.0.0",
+  "description": "A test of P2P settings",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WhoSoup/p2p-fanout.git"
+  },
+  "author": "Who Soup",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/WhoSoup/p2p-fanout/issues"
+  },
+  "homepage": "https://github.com/WhoSoup/p2p-fanout#readme"
+}
