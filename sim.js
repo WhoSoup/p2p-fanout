@@ -3,9 +3,12 @@ class Msg {
         this.id = id
         this.round = r
         this.from = f
+        this.history = []
     }
     next() {
-        return new Msg(this.id, this.round+1, this.from)
+        let n = new Msg(this.id, this.round+1, this.from)
+        n.history = this.history
+        return n
     }
 }
 
@@ -26,6 +29,7 @@ class Node {
         this.recv[m.id]++
         if (this.msg == null) {
             this.msg = m.next()
+            this.msg.history.push(this.id)
             return true
         }
         return false
@@ -43,9 +47,10 @@ class Node {
             return r
         }
         
-        let fo = without(this.cons, [this.msg.from])
+        let fo = without(this.cons, [])
         shuffle(fo)
         fo = fo.slice(0, fanout)
+        fo = without(fo, this.msg.history)
         
         this.sent[this.msg.id] = 1
         this.msg.from = this.id
@@ -122,17 +127,43 @@ class Sim {
             }
         }
     }
+    hubConnections() {
+        for (let n of this.nodes) {
+            for (let i = 0; i < 10; i++) {
+                if (i != n.id) {
+                    n.cons.push(i)
+                    this.nodes[i].cons.push(n.id)
+                }
+            }
+        }
+        let ll = [...Array(this.count).keys()]
+        for (let i = 0; i < this.count; i++) {
+            let needed = this.connections - this.nodes[i].cons.length;
+            if (needed > 0) {
+                let links = without(ll, [i, ...this.nodes[i].cons])
+                shuffle(links)
+                links = links.slice(0, needed)
+                //console.log(`Node ${i} needs ${needed} cons, have ${this.nodes[i].cons}, picking ${links}`)
+                for (let c of links) {
+                    this.nodes[i].cons.push(c)
+                    this.nodes[c].cons.push(i)
+                }
+            }
+        }
+    }
     
     sample() {
         for (let n of this.nodes) {
             n.initRound()
         }
+        this.nodes[0].recv[this.samples]++
         this.nodes[0].msg = new Msg(this.samples, 0, 0)
-        this.samples++
+        
+        
 
         let i = 0
         
-        let total = {sent: 0, waste: 0, rounds: 0}
+        let total = {sent: 0, waste: 0, overload: 0, rounds: 0}
         do {
             //console.log(`round ${i} start`)
             for (let n of this.nodes) {
@@ -143,7 +174,14 @@ class Sim {
             total.rounds++
             i++
         } while (i < this.rounds)
+            
+        for (let n of this.nodes) {
+            total.overload += n.recv[this.samples]
+        }
+        
         this.data.push(total)
+        
+        this.samples++
 
         /*for (let n of this.nodes) {
             console.log(n.id, n.recv.slice(0,3))
