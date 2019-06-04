@@ -1,22 +1,25 @@
+// a message
 class Msg {
     constructor(id, r, f) {
         this.id = id
         this.round = r
         this.from = f
-        this.history = []
+        //this.history = []
     }
+    // generate message for next round 
     next() {
         let n = new Msg(this.id, this.round+1, this.from)
-        n.history = this.history
+        //n.history = this.history
         return n
     }
 }
 
+// a node
 class Node {
     constructor(id, cons) {
         this.id = id
-        this.recv = []
-        this.sent = []
+        this.recv = [] // message id => count
+        this.sent = [] // message id => int-bool
         this.cons = cons
         this.msg = null
     }
@@ -29,11 +32,13 @@ class Node {
         this.recv[m.id]++
         if (this.msg == null) {
             this.msg = m.next()
-            this.msg.history.push(this.id)
+            //this.msg.history.push(this.id)
             return true
         }
         return false
     }
+    
+    // perform one round
     round(nodes, rnd, fanout) {
         let r = {sent: 0, waste: 0}
         if (this.msg == null) {
@@ -47,10 +52,11 @@ class Node {
             return r
         }
         
+        // fanout
         let fo = without(this.cons, [])
         shuffle(fo)
         fo = fo.slice(0, fanout)
-        fo = without(fo, this.msg.history)
+        //fo = without(fo, this.msg.history)
         
         this.sent[this.msg.id] = 1
         this.msg.from = this.id
@@ -69,6 +75,7 @@ class Node {
     }
 }
 
+// shuffle array
 function shuffle(a) {
     var j, x, i;
     for (i = a.length - 1; i > 0; i--) {
@@ -80,6 +87,7 @@ function shuffle(a) {
     return a;
 }
 
+// subtract array "wo" from "a"
 function without(a, wo) {
     let r = []
     for (let i of a)
@@ -88,6 +96,7 @@ function without(a, wo) {
     return r
 }
 
+// a simulator
 class Sim {
     constructor(count, connections, fanout, rounds) {
         this.count = count
@@ -108,6 +117,7 @@ class Sim {
         return nodes
     }
 
+    // create bi-directional random nodes
     randomizeConnections() {
         for (let n of this.nodes) {
             n.cons = []
@@ -127,6 +137,8 @@ class Sim {
             }
         }
     }
+    
+    // initialize nodes with connections to the first 10 nodes, fill the rest randomly
     hubConnections() {
         for (let n of this.nodes) {
             for (let i = 0; i < 10; i++) {
@@ -152,6 +164,7 @@ class Sim {
         }
     }
     
+    // generate samples
     sample() {
         for (let n of this.nodes) {
             n.initRound()
@@ -160,9 +173,7 @@ class Sim {
         this.nodes[0].msg = new Msg(this.samples, 0, 0)
         
         
-
         let i = 0
-        
         let total = {sent: 0, waste: 0, overload: 0, rounds: 0}
         do {
             //console.log(`round ${i} start`)
