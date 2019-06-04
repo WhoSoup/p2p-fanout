@@ -19,8 +19,10 @@ function stats(s, count, sample) {
 // create table cell by taking samples
 function sample(samples, count, connections, fanout, rounds, random) {
     let s = new Sim(count, connections, fanout, rounds)
+    
+    // heavy lifting routine
     for (let i = 0; i < samples; i++) {
-        if (i % 100 == 0) {
+        if (i == 0) {
             if (random)
                 s.randomizeConnections()
             else
@@ -59,13 +61,13 @@ function sample(samples, count, connections, fanout, rounds, random) {
 
 function table(nodes, samples, random) {
     console.log("")
-    console.log("## " + nodes + " nodes @ " + samples + " samples" + (random ? "(random)" : "(hub)"))
-    console.log(`|R / F|1|2|3|4|5|6|`)
-    console.log(`|---|---|---|---|---|---|---|`)
+    console.log("## " + nodes + " nodes @ " + samples + " samples " + (random ? "(random)" : "(hub)"))
+    console.log(`|R / F|1|2|3|4|5|6|7|8|`)
+    console.log(`|---|---|---|---|---|---|---|---|---|`)
     for (let fanout = 1; fanout <= 16; fanout++) {
         process.stdout.write("|" + fanout + "|")
-        for (let rounds = 1; rounds <= 6; rounds++) {
-            sample(samples, nodes, 32, fanout, rounds)
+        for (let rounds = 1; rounds <= 8; rounds++) {
+            sample(samples, nodes, 32, fanout, rounds, random)
             
         }
         process.stdout.write("\n")
@@ -73,15 +75,15 @@ function table(nodes, samples, random) {
     console.error(""+nodes+ " " +random+" done")
 }
 
-table(50, 2000, true)
-table(50, 2000, false)
-table(125, 2000, true)
-table(125, 2000, false)
-table(200, 1000, true)
-table(200, 1000, false)
-table(1000, 500, true)
-table(1000, 500, false)
-table(5000, 250, true)
-table(5000, 250, false)
+table(50, 100, true)
+table(50, 100, false)
+table(125, 100, true)
+table(125, 100, false)
+table(200, 100, true)
+table(200, 100, false)
+table(1000, 100, true)
+table(1000, 100, false)
+table(5000, 100, true)
+table(5000, 100, false)
 
 //sample(1, 32, 4, 8, 6)

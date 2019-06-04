@@ -104,7 +104,7 @@ class Sim {
         this.fanout = fanout
         this.rounds = rounds
         this.nodes = this.makeNetwork()
-        this.randomizeConnections()
+        //this.randomizeConnections()
         this.samples = 0
         this.data = []
     }
